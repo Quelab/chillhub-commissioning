@@ -48,14 +48,12 @@ var commissioning = module.exports = function(options) {
 
     options.exec(command.join(' '), function(e, stdout, stderr) {    
       if (e) return res.status(500).json({ kind: 'error#network-list', error: e });
-     
-      var networks = stdout.trim();
 
-      if (networks) { 
-        networks = networks.split(',').map(function(ssid) {
-          return { ssid: ssid };
-        });
-      }
+      stdout = stdout.trim();
+     
+      var networks = (stdout ? stdout.split(',') : []).map(function(ssid) {
+        return { ssid: ssid };
+      });
 
       return res.status(200).json(networks);
     });
