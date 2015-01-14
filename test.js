@@ -199,7 +199,7 @@ describe('commissioning', function() {
         .end(function() { });
     })
 
-    it('should handle errors', function(done) {
+    it('should respond immediately', function(done) {
       options.exec = function(command, callback) {
         callback('failure');
       };
@@ -213,10 +213,7 @@ describe('commissioning', function() {
           passphrase: 'some password'
         })
         .expect('Content-Type', /json/)
-        .expect(500, {
-          kind: 'error#network-connect',
-          error: 'failure'
-        }, done);
+        .expect(200, done);
     })
 
     it('should return with success', function(done) {

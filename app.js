@@ -86,12 +86,10 @@ var commissioning = module.exports = function(options) {
       return res.status(400).json({ kind: 'error#input-validation', property: 'passphrase' });
     }
 
-    var command = base_command.concat('-w', '"' + ssid + '"', '"' + passphrase + '"');
+    res.status(200).json({ ssid: ssid });
 
-    options.exec(command.join(' '), function(e, stdout, stderr) {    
-      if (e) res.status(500).json({ kind: 'error#network-connect', error: e });
-      else res.status(200).json({ ssid: ssid });
-    });
+    var command = base_command.concat('-w', '"' + ssid + '"', '"' + passphrase + '"');
+    options.exec(command.join(' '), function() { });
   });
 
   return app;  
