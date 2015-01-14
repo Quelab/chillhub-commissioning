@@ -8,7 +8,8 @@ describe('commissioning', function() {
 
   beforeEach(function() {
     options = {
-      uuid: '1af9942c-f1f5-4f50-ae25-92833b654ead'
+      uuid: '1af9942c-f1f5-4f50-ae25-92833b654ead',
+      passphrase: 'chillhub'
     };
 
     app = express();
@@ -218,7 +219,7 @@ describe('commissioning', function() {
 
     it('should return with success', function(done) {
       options.exec = function(command, callback) {
-        callback(null, 'Network 1,Network2,Network-3');
+        callback(null, '\n', '\n');
       };
 
       request(app)
@@ -231,6 +232,45 @@ describe('commissioning', function() {
         })
         .expect('Content-Type', /json/)
         .expect(200, done);
+    })
+  })
+
+  describe('DELETE /networks', function() {
+    it('should host an access point', function(done) {
+      options.exec = function(command, callback) {
+        should(command).eql('/share/pifi wlan0 -a "ChillHub-1af9942c" "chillhub"');
+        done();
+      };
+
+      request(app)
+        .del('/networks')
+        .set('Accept', 'application/json')
+        .set('Content-Type', 'application/json')
+        .end(function() { });
+    })
+
+    it('should respond immediately', function(done) {
+      options.exec = function(command, callback) {
+        callback('failure');
+      };
+
+      request(app)
+        .del('/networks')
+        .set('Accept', 'application/json')
+        .set('Content-Type', 'application/json')
+        .expect(204, done);
+    })
+
+    it('should return with success', function(done) {
+      options.exec = function(command, callback) {
+        callback(null, '\n', '\n');
+      };
+
+      request(app)
+        .del('/networks')
+        .set('Accept', 'application/json')
+        .set('Content-Type', 'application/json')
+        .expect(204, done);
     })
   })
 })

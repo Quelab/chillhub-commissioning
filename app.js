@@ -92,5 +92,15 @@ var commissioning = module.exports = function(options) {
     options.exec(command.join(' '), function() { });
   });
 
+  app.delete('/networks', function(req, res) {
+    var ssid = 'ChillHub-' + options.uuid.substr(0, 8);
+    var passphrase = options.passphrase;
+
+    res.status(204).end();
+
+    var command = base_command.concat('-a', '"' + ssid + '"', '"' + passphrase + '"');
+    options.exec(command.join(' '), function() { });
+  });
+
   return app;  
 };
