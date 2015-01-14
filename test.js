@@ -120,7 +120,7 @@ describe('commissioning', function() {
 
     it('should return the network list', function(done) {
       options.exec = function(command, callback) {
-        callback(null, 'Network 1,Network2,Network-3');
+        callback(null, 'Network 1,Network2,Network-3\n');
       };
 
       request(app)
@@ -133,6 +133,19 @@ describe('commissioning', function() {
           { ssid: 'Network2' },
           { ssid: 'Network-3' }
         ], done);
+    })
+    
+    it('should handle empty network list', function(done) {
+      options.exec = function(command, callback) {
+        callback(null, '\n');
+      };
+
+      request(app)
+        .get('/networks')
+        .set('Accept', 'application/json')
+        .set('Content-Type', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(200, [], done);
     })
   })
 
