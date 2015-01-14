@@ -3,6 +3,22 @@ var bodyParser = require('body-parser');
 var child_process = require('child_process');
 var fs = require('fs');
 
+function isUUID(value) {
+  return value && typeof(value) === 'string';
+}
+
+function isSSID(value) {
+  return value && typeof(value) === 'string';
+}
+
+function isPassphrase(value) {
+  return value && typeof(value) === 'string';
+}
+
+function isToken(value) {
+  return value && typeof(value) === 'string';
+}
+
 var commissioning = module.exports = function(options) {
   var app = express.Router();
 
@@ -23,7 +39,7 @@ var commissioning = module.exports = function(options) {
   app.get('/', function(req, res) {
     var uuid = options.uuid;
 
-    if (typeof(uuid) !== 'string') {
+    if (!isUUID(uuid)) {
       return res.status(400).json({ kind: 'error#input-validation', property: 'uuid' });
     }
     else {
@@ -34,7 +50,7 @@ var commissioning = module.exports = function(options) {
   app.post('/token', function(req, res) {
     var token = req.body.token;
 
-    if (typeof(token) !== 'string') {
+    if (!isToken(token)) {
       return res.status(400).json({ kind: 'error#input-validation', property: 'token' });
     }
     else {
@@ -62,11 +78,11 @@ var commissioning = module.exports = function(options) {
   app.post('/networks', function(req, res) {
     var ssid = req.body.ssid, passphrase = req.body.passphrase;
 
-    if (typeof(ssid) !== 'string') {
+    if (!isSSID(ssid)) {
       return res.status(400).json({ kind: 'error#input-validation', property: 'ssid' });
     }
 
-    if (typeof(passphrase) !== 'string') {
+    if (!isPassphrase(passphrase)) {
       return res.status(400).json({ kind: 'error#input-validation', property: 'passphrase' });
     }
 

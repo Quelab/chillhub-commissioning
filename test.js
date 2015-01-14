@@ -156,6 +156,7 @@ describe('commissioning', function() {
         .set('Accept', 'application/json')
         .set('Content-Type', 'application/json')
         .send({
+          ssid: "",
           passphrase: 'some password'
         })
         .expect('Content-Type', /json/)
@@ -171,7 +172,8 @@ describe('commissioning', function() {
         .set('Accept', 'application/json')
         .set('Content-Type', 'application/json')
         .send({
-          ssid: 'Some Network'
+          ssid: 'Some Network',
+          passphrase: ""
         })
         .expect('Content-Type', /json/)
         .expect(400, {
