@@ -1,12 +1,12 @@
 # ChillHub Commissioning
 **A [Docker](https://www.docker.com) application to connect the  [ChillHub](https://firstbuild.com/bpwagner/chillhub) to a wireless network**
 
-### Read metadata
+### Read the metadata
 Each ChillHub has a universally unique identifier, known as a [UUID](http://en.wikipedia.org/wiki/Universally_unique_identifier). The mobile application uses this identifier to differentiate between ChillHubs for a single user.
 
 ``` bash
 $ curl http://192.168.10.1
-{ "uuid":"8a8fa07c-8d54-470c-8643-095ee1dba7b2" }
+{ "uuid": "8a8fa07c-8d54-470c-8643-095ee1dba7b2" }
 ```
 
 ### List the wireless networks
@@ -22,7 +22,7 @@ $ curl http://192.168.10.1/networks
 ```
 
 ### Connect to a wireless network
-In order to connect the ChillHub to a wireless network, it must be provided the SSID and a passphrase of the wireless network.
+In order to connect the ChillHub to a wireless network, it must be provided the SSID and passphrase of the wireless network.
 
 ``` bash
 $ curl -X POST -H "Content-Type: application/json" -d '{"ssid":"Network 1", "passphrase": "password"}' http://192.168.10.1/networks
