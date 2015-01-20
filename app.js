@@ -19,19 +19,20 @@ function isToken(value) {
   return value && typeof(value) === 'string';
 }
 
-var commissioning = module.exports = function(options) {
+var commissioning = module.exports = function(options, M) {
   var app = express.Router();
 
-  options = options || { };
-  options.fs = options.fs || fs;
-  options.exec = options.exec || child_process.exec;
-  options.pifi = options.pifi || '/share/pifi';
-  options.interface = options.interface || 'wlan0';
-  options.tokenFile = options.tokenFile || '/share/token.json';
+  M = M || { };
+  M.fs = M.fs || fs;
+  M.exec = M.exec || child_process.exec;
+  M.pifi = M.pifi || 'pifi';
+  M.interface = M.interface || 'wlan0';
+  M.tokenFile = M.tokenFile || './share/chillhub.json';
 
   var base_command = [
-    options.pifi,
-    options.interface
+    'cd ./share &&',
+    M.pifi,
+    M.interface
   ];
 
   app.use(bodyParser.json());
@@ -54,7 +55,8 @@ var commissioning = module.exports = function(options) {
       return res.status(400).json({ kind: 'error#input-validation', property: 'token' });
     }
     else {
-      options.fs.writeFileSync(options.tokenFile, JSON.stringify({ token: token }));
+      options.token = token;
+      M.fs.writeFileSync(M.tokenFile, JSON.stringify(options));
       return res.status(200).json({ });
     }
   });
@@ -62,7 +64,7 @@ var commissioning = module.exports = function(options) {
   app.get('/networks', function(req, res) {
     var command = base_command.concat('-l');
 
-    options.exec(command.join(' '), function(e, stdout, stderr) {    
+    M.exec(command.join(' '), function(e, stdout, stderr) {    
       if (e) return res.status(500).json({ kind: 'error#network-list', error: e });
 
       stdout = stdout.trim();
@@ -89,7 +91,7 @@ var commissioning = module.exports = function(options) {
     res.status(200).json({ ssid: ssid });
 
     var command = base_command.concat('-w', '"' + ssid + '"', '"' + passphrase + '"');
-    options.exec(command.join(' '), function() { });
+    M.exec(command.join(' '), function() { });
   });
 
   app.delete('/networks', function(req, res) {
@@ -99,7 +101,7 @@ var commissioning = module.exports = function(options) {
     res.status(204).end();
 
     var command = base_command.concat('-a', '"' + ssid + '"', '"' + passphrase + '"');
-    options.exec(command.join(' '), function() { });
+    M.exec(command.join(' '), function() { });
   });
 
   return app;  

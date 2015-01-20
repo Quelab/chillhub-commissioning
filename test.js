@@ -4,7 +4,7 @@ var express = require('express');
 var commissioning = require('./app.js');
 
 describe('commissioning', function() {
-  var app, options;
+  var app, options, dependencies;
 
   beforeEach(function() {
     options = {
@@ -12,8 +12,10 @@ describe('commissioning', function() {
       passphrase: 'chillhub'
     };
 
+    dependencies = { };
+
     app = express();
-    app.use(commissioning(options));
+    app.use(commissioning(options, dependencies));
   })
 
   describe('GET /', function() {
@@ -58,10 +60,16 @@ describe('commissioning', function() {
     })
 
     it('should save the token to the file', function(done) {
-      options.fs = {
+      dependencies.fs = {
         writeFileSync: function(filename, json) {
-          should(filename).eql('/share/token.json');
-          should(JSON.parse(json)).eql({ token: 'abc123' });
+          should(filename).eql('./share/chillhub.json');
+
+          should(JSON.parse(json)).eql({
+            uuid: '1af9942c-f1f5-4f50-ae25-92833b654ead',
+            passphrase: 'chillhub',
+            token: 'abc123'
+          });
+
           done();
         }
       };
@@ -75,7 +83,7 @@ describe('commissioning', function() {
     })
 
     it('should return success', function(done) {
-      options.fs = {
+      dependencies.fs = {
         writeFileSync: function(filename, json) { }
       };
 
@@ -91,8 +99,8 @@ describe('commissioning', function() {
 
   describe('GET /networks', function() {
     it('should run the network list command', function(done) {
-      options.exec = function(command, callback) {
-        should(command).eql('/share/pifi wlan0 -l');
+      dependencies.exec = function(command, callback) {
+        should(command).eql('cd ./share && pifi wlan0 -l');
         done();
       };
 
@@ -104,7 +112,7 @@ describe('commissioning', function() {
     })
 
     it('should handle errors', function(done) {
-      options.exec = function(command, callback) {
+      dependencies.exec = function(command, callback) {
         callback('failure');
       };
 
@@ -120,7 +128,7 @@ describe('commissioning', function() {
     })
 
     it('should return the network list', function(done) {
-      options.exec = function(command, callback) {
+      dependencies.exec = function(command, callback) {
         callback(null, 'Network 1,Network2,Network-3\n');
       };
 
@@ -137,7 +145,7 @@ describe('commissioning', function() {
     })
     
     it('should handle empty network list', function(done) {
-      options.exec = function(command, callback) {
+      dependencies.exec = function(command, callback) {
         callback(null, '\n');
       };
 
@@ -184,8 +192,8 @@ describe('commissioning', function() {
     })
 
     it('should run the network connect command', function(done) {
-      options.exec = function(command, callback) {
-        should(command).eql('/share/pifi wlan0 -w "Some Network" "some password"');
+      dependencies.exec = function(command, callback) {
+        should(command).eql('cd ./share && pifi wlan0 -w "Some Network" "some password"');
         done();
       };
 
@@ -201,7 +209,7 @@ describe('commissioning', function() {
     })
 
     it('should respond immediately', function(done) {
-      options.exec = function(command, callback) {
+      dependencies.exec = function(command, callback) {
         callback('failure');
       };
 
@@ -218,7 +226,7 @@ describe('commissioning', function() {
     })
 
     it('should return with success', function(done) {
-      options.exec = function(command, callback) {
+      dependencies.exec = function(command, callback) {
         callback(null, '\n', '\n');
       };
 
@@ -237,8 +245,8 @@ describe('commissioning', function() {
 
   describe('DELETE /networks', function() {
     it('should host an access point', function(done) {
-      options.exec = function(command, callback) {
-        should(command).eql('/share/pifi wlan0 -a "ChillHub-1af9942c" "chillhub"');
+      dependencies.exec = function(command, callback) {
+        should(command).eql('cd ./share && pifi wlan0 -a "ChillHub-1af9942c" "chillhub"');
         done();
       };
 
@@ -250,7 +258,7 @@ describe('commissioning', function() {
     })
 
     it('should respond immediately', function(done) {
-      options.exec = function(command, callback) {
+      dependencies.exec = function(command, callback) {
         callback('failure');
       };
 
@@ -262,7 +270,7 @@ describe('commissioning', function() {
     })
 
     it('should return with success', function(done) {
-      options.exec = function(command, callback) {
+      dependencies.exec = function(command, callback) {
         callback(null, '\n', '\n');
       };
 
