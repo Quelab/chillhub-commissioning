@@ -6,6 +6,7 @@ RUN wget http://node-arm.herokuapp.com/node_latest_armhf.deb
 RUN dpkg -i node_latest_armhf.deb
 ADD package.json /src/package.json
 RUN cd /src && npm install
+RUN apt-get install -y ca-certificates
 RUN wget https://raw.githubusercontent.com/bakerface/pifi/master/install
 RUN ./install
 ADD . /src
