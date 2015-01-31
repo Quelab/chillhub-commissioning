@@ -55,9 +55,16 @@ var commissioning = module.exports = function(options, M) {
       return res.status(400).json({ kind: 'error#input-validation', property: 'token' });
     }
     else {
-      options.token = token;
-      M.fs.writeFileSync(M.tokenFile, JSON.stringify(options));
-      return res.status(200).json({ });
+      var command = base_command.concat('-s');
+
+      M.exec(command.join(' '), function(e, stdout, stderr) {
+        if (e) return res.status(500).json({ kind: 'error#set-token', error: e });
+        if (stdout.trim() != "AccessPoint_Hosting") return res.status(403).json({ kind: 'error#set-token' });
+
+        options.token = token;
+        M.fs.writeFileSync(M.tokenFile, JSON.stringify(options));
+        return res.status(200).json({ });
+      });
     }
   });
 

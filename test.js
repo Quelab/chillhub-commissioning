@@ -59,7 +59,28 @@ describe('commissioning', function() {
         }, done);
     })
 
+    it('should protect the token', function(done) {
+      dependencies.exec = function(command, callback) {
+        should(command).eql('cd ./share && pifi wlan0 -s');
+        callback(null, 'WiFi_Connected\n');
+      };
+
+      request(app)
+        .post('/token')
+        .set('Accept', 'application/json')
+        .set('Content-Type', 'application/json')
+        .send({ token: 'abc123' })
+        .expect('Content-Type', /json/)
+        .expect(403, {
+          kind: 'error#set-token',
+        }, done);
+    })
+
     it('should save the token to the file', function(done) {
+      dependencies.exec = function(command, callback) {
+        callback(null, 'AccessPoint_Hosting\n');
+      };
+
       dependencies.fs = {
         writeFileSync: function(filename, json) {
           should(filename).eql('./share/chillhub.json');
@@ -83,6 +104,10 @@ describe('commissioning', function() {
     })
 
     it('should return success', function(done) {
+      dependencies.exec = function(command, callback) {
+        callback(null, 'AccessPoint_Hosting\n');
+      };
+
       dependencies.fs = {
         writeFileSync: function(filename, json) { }
       };
