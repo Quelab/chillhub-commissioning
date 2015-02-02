@@ -9,6 +9,8 @@ RUN apt-get install -y ca-certificates
 RUN wget https://raw.githubusercontent.com/bakerface/pifi/master/install
 RUN chmod +x install && ./install
 
+RUN apt-get install -y git python make g++
+
 ADD package.json /src/package.json
 RUN cd /src && npm install
 ADD . /src
