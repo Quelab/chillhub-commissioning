@@ -2,6 +2,7 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var child_process = require('child_process');
 var fs = require('fs');
+var hardware = require('./hardware.js')();
 
 function isUUID(value) {
   return value && typeof(value) === 'string';
@@ -34,6 +35,29 @@ var commissioning = module.exports = function(options, M) {
     M.pifi,
     M.interface
   ];
+
+  hardware.listen(function(error, event) {
+    if (error) return console.error('hardware error:', error);
+
+    if (event == 'BUTTON_PRESS_SHORT') {
+      var ssid = 'ChillHub-' + options.uuid.substr(0, 8);
+      var passphrase = options.passphrase;
+
+      var command = 'cd ./share && ' +
+        '[ "$(' + M.pifi + ' ' + M.interface + ' -s)" == "Idle" ] && ' +
+        M.pifi + ' ' + M.interface + ' -a "' + ssid + '" "' + passphrase + '"';
+
+      M.exec(command, function(e, stdout, stderr) { });
+    }
+    else if (event == 'BUTTON_PRESS_LONG') {
+      var command = base_command.concat('-i');
+
+      M.exec(command.join(' '), function(e, stdout, stderr) { });
+    }
+    else {
+      console.error('Unknown event:', event);
+    }
+  });
 
   app.use(bodyParser.json());
 
