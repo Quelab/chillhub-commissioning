@@ -1,6 +1,6 @@
 {
   "name": "chillhub-commissioning",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "A Docker application to connect the ChillHub to a wireless network",
   "main": "server.js",
   "scripts": {

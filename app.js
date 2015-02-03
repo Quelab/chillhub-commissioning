@@ -72,6 +72,18 @@ var commissioning = module.exports = function(options, M) {
     });
   }
 
+  function update_led() {
+    pifi_state(function(e, state) {
+      if (state == 'Idle') hardware.ledOff();
+      else if (state == 'WiFi_Connected') hardware.ledOn();
+      else hardware.ledFlash();
+    });
+
+    setTimeout(update_led, 1000);
+  }
+
+  update_led();
+
   hardware.listen(function(error, event) {
     if (error) return console.error('hardware error:', error);
 

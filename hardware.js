@@ -10,7 +10,7 @@ module.exports = function() {
   var flash_timer = null;
   var pressed = 0;
 
-  function flash_start() {
+  function led_flash() {
     if (!flash_timer) {
       led.writeSync(1);
 
@@ -20,10 +20,16 @@ module.exports = function() {
     }
   }
 
-  function flash_stop() {
+  function led_off() {
     clearInterval(flash_timer);
     flash_timer = null;
     led.writeSync(0);
+  }
+  
+  function led_on() {
+    clearInterval(flash_timer);
+    flash_timer = null;
+    led.writeSync(1);
   }
 
   function listen(callback) {
@@ -57,13 +63,12 @@ module.exports = function() {
     button.watch(on_press);
   }
 
-  flash_stop();
+  led_off();
 
   return {
-    ledFlashOn: flash_start,
-    ledFlashOff: flash_stop,
-    ledOn: function() { led.writeSync(1); },
-    ledOff: function() { led.writeSync(0); },
+    ledFlash: led_flash,
+    ledOn: led_on,
+    ledOff: led_off,
     listen: listen
   };
 };
