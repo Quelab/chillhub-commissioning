@@ -10,10 +10,10 @@ RUN apt-get install -y ca-certificates
 RUN wget https://raw.githubusercontent.com/bakerface/pifi/master/install
 RUN chmod +x install && ./install
 
-ADD package.json /src/package.json
-RUN cd /src && npm install
-ADD . /src
 WORKDIR /src
+ADD package.json /src/package.json
+RUN npm install --production
+ADD . /src
 EXPOSE 80
 CMD ["npm", "start"]
 

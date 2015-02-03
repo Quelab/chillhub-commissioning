@@ -36,23 +36,60 @@ var commissioning = module.exports = function(options, M) {
     M.interface
   ];
 
+  function pifi_state(callback) {
+    var command = base_command.concat('-s').join(' ');
+
+    M.exec(command, function(e, stdout, stderr) {
+      if (e) callback(e);
+      else callback(null, stdout.trim());
+    });
+  }
+
+  function idle(callback) {
+    var command = base_command.concat('-i').join(' ');
+
+    M.exec(command, function(e, stdout, stderr) {
+      callback(e);
+    });
+  }
+
+  function access_point(callback) {
+    var ssid = 'ChillHub-' + options.uuid.substr(0, 8);
+    var passphrase = options.passphrase;
+
+    var command = base_command.concat('-a', '"' + ssid + '"', '"' + passphrase + '"').join(' ');
+
+    M.exec(command, function(e, stdout, stderr) {
+      callback(e);
+    });
+  }
+
+  function wireless_connect(ssid, passphrase, callback) {
+    var command = base_command.concat('-w', '"' + ssid + '"', '"' + passphrase + '"').join(' ');
+    
+    M.exec(command, function(e, stdout, stderr) {
+      callback(e);
+    });
+  }
+
   hardware.listen(function(error, event) {
     if (error) return console.error('hardware error:', error);
 
     if (event == 'BUTTON_PRESS_SHORT') {
-      var ssid = 'ChillHub-' + options.uuid.substr(0, 8);
-      var passphrase = options.passphrase;
-
-      var command = 'cd ./share && ' +
-        '[ "$(' + M.pifi + ' ' + M.interface + ' -s)" == "Idle" ] && ' +
-        M.pifi + ' ' + M.interface + ' -a "' + ssid + '" "' + passphrase + '"';
-
-      M.exec(command, function(e, stdout, stderr) { });
+      pifi_state(function(e, state) {
+        if (state == 'Idle') {
+          access_point(function(e) {
+            console.log('Started access point');
+          });
+        }
+        else {
+          console.log('Ignoring short button press in state', state);
+        }
+      });
     }
     else if (event == 'BUTTON_PRESS_LONG') {
-      var command = base_command.concat('-i');
-
-      M.exec(command.join(' '), function(e, stdout, stderr) { });
+      console.log('Going to idle state');
+      idle(function() { });
     }
     else {
       console.error('Unknown event:', event);
@@ -79,11 +116,9 @@ var commissioning = module.exports = function(options, M) {
       return res.status(400).json({ kind: 'error#input-validation', property: 'token' });
     }
     else {
-      var command = base_command.concat('-s');
-
-      M.exec(command.join(' '), function(e, stdout, stderr) {
+      pifi_state(function(e, state) {
         if (e) return res.status(500).json({ kind: 'error#set-token', error: e });
-        if (stdout.trim() != "AccessPoint_Hosting") return res.status(403).json({ kind: 'error#set-token' });
+        if (state != "AccessPoint_Hosting") return res.status(403).json({ kind: 'error#set-token' });
 
         options.token = token;
         M.fs.writeFileSync(M.tokenFile, JSON.stringify(options));
@@ -120,19 +155,12 @@ var commissioning = module.exports = function(options, M) {
     }
 
     res.status(200).json({ ssid: ssid });
-
-    var command = base_command.concat('-w', '"' + ssid + '"', '"' + passphrase + '"');
-    M.exec(command.join(' '), function() { });
+    wireless_connect(ssid, passphrase, function() { });
   });
 
   app.delete('/networks', function(req, res) {
-    var ssid = 'ChillHub-' + options.uuid.substr(0, 8);
-    var passphrase = options.passphrase;
-
     res.status(204).end();
-
-    var command = base_command.concat('-a', '"' + ssid + '"', '"' + passphrase + '"');
-    M.exec(command.join(' '), function() { });
+    access_point(function() { });
   });
 
   return app;  
