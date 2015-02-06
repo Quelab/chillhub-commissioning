@@ -16,6 +16,10 @@ function isPassphrase(value) {
   return value && typeof(value) === 'string';
 }
 
+function isURL(value) {
+  return value && typeof(value) === 'string';
+}
+
 function isToken(value) {
   return value && typeof(value) === 'string';
 }
@@ -121,19 +125,25 @@ var commissioning = module.exports = function(options, M) {
     }
   });
 
-  app.post('/token', function(req, res) {
+  app.post('/auth', function(req, res) {
     var token = req.body.token;
+    var url = req.body.url;
 
     if (!isToken(token)) {
       return res.status(400).json({ kind: 'error#input-validation', property: 'token' });
     }
+    else if (!isURL(url)) {
+      return res.status(400).json({ kind: 'error#input-validation', property: 'url' });
+    }
     else {
       pifi_state(function(e, state) {
-        if (e) return res.status(500).json({ kind: 'error#set-token', error: e });
-        if (state != "AccessPoint_Hosting") return res.status(403).json({ kind: 'error#set-token' });
+        if (e) return res.status(500).json({ kind: 'error#auth', error: e });
+        if (state != "AccessPoint_Hosting") return res.status(403).json({ kind: 'error#permission-denied' });
 
+        options.firebaseUrl = url;
         options.token = token;
         M.fs.writeFileSync(M.tokenFile, JSON.stringify(options));
+
         return res.status(200).json({ });
       });
     }
