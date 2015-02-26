@@ -16,7 +16,8 @@ RUN apt-get install -y git python make g++ libudev-dev libusb-1.0-0-dev build-es
 
 RUN apt-get install -y ca-certificates
 RUN wget https://raw.githubusercontent.com/bakerface/pifi/master/install
-RUN chmod +x install && ./install
+RUN chmod +x install 
+RUN ./install
 
 WORKDIR /src
 ADD package.json /src/package.json
