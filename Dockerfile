@@ -6,7 +6,7 @@ RUN apt-get install -y dialog wget
 # armv6 - Pi v1
 #RUN wget http://node-arm.herokuapp.com/node_latest_armhf.deb
 #RUN dpkg -i node_latest_armhf.deb
-#RUN apt-get install -y git python make g++ libudev-dev libusb-1.0-0-dev 
+#RUN apt-get install -y git python make g++ libudev-dev libusb-1.0-0-dev
 
 # armv7 - Pi v2
 RUN dpkg -r node
@@ -15,8 +15,8 @@ RUN curl -sL https://deb.nodesource.com/setup | bash -
 RUN apt-get install -y git python make g++ libudev-dev libusb-1.0-0-dev build-essential nodejs
 
 RUN apt-get install -y ca-certificates
-RUN wget https://raw.githubusercontent.com/bakerface/pifi/master/install
-RUN chmod +x install 
+RUN wget https://raw.githubusercontent.com/quelab/pifi/master/install
+RUN chmod +x install
 RUN ./install
 
 WORKDIR /src
